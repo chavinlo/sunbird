@@ -37,8 +37,11 @@ impl Engine {
             },
             Settlement::Discord(Ok(response)) => {
                // Discord's reply, so its URLs vouch for a plugin's rewrites as the
-               // app's own replies do.
-               saw(&ctx, &Links::scan(&String::from_utf8_lossy(&response.body)));
+               // app's own replies do. Not its errors, which quote back whatever
+               // value the plugin sent.
+               if (200..300).contains(&response.status) {
+                  saw(&ctx, &Links::scan(&String::from_utf8_lossy(&response.body)));
+               }
                response_object(&ctx, &response).map(|object| Ok(object.into_value()))
             },
             Settlement::Int(Ok(number)) => Ok(Ok(Value::new_int(ctx.clone(), number))),
